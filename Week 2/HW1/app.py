@@ -39,13 +39,25 @@ def init_db():
 @app.get("/orders")
 def list_order():
     with get_db() as conn:
-        orders = conn.execute("SELECt * FROM orders").fetchall()
+        orders = conn.execute("SELECT * FROM orders").fetchall()
         order_list = [dict(b) for b in orders]
 
         return jsonify({
             "data": order_list,
             "total": len(order_list)
         }), 200
+
+@app.get("/orders/<int:oid>")
+def get_order(oid):
+    with get_db() as conn:
+        order = conn.execute("SELECT * FROM orders WHERE id = ?", (oid,)).fetchone()
+
+    if not order:
+        return jsonify(error="not found"), 404
+
+    order_dict = dict(order)
+
+    return jsonify(order_dict), 200
 
 @app.post("/orders")
 def create_order():
