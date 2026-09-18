@@ -3,12 +3,12 @@ from flask import Flask, jsonify, request, make_response
 app = Flask(__name__)
 
 BOOKS = [
-    {"id": 101, "title": "Book A", "author_id": 1},
-    {"id": 102, "title": "Book B", "author_id": 1},
-    {"id": 103, "title": "Book C", "author_id": 2},
-    {"id": 104, "title": "Book D", "author_id": 2},
-    {"id": 105, "title": "Book E", "author_id": 3},
-    {"id": 106, "title": "Book F", "author_id": 3}
+    {"id": 101, "title": "Book A", "author": "author 1"},
+    {"id": 102, "title": "Book B", "author": "author 2"},
+    {"id": 103, "title": "Book C", "author": "author 3"},
+    {"id": 104, "title": "Book D", "author": "author 4"},
+    {"id": 105, "title": "Book E", "author": "author 5"},
+    {"id": 106, "title": "Book F", "author": "author 6"}
 ]
 
 _next_id = 1
