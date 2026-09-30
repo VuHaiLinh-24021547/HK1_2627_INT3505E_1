@@ -14,13 +14,13 @@ Dựa trên yêu cầu hệ thống blog, các tài nguyên (resources) chính �
 
 ## 2. Phân Loại Collection / Item / Sub-resource
 
-**Collection**: `/posts`.
-**Item** `/posts/{post_id}` Quản lý một bài viết cụ thể theo ID.
-**Sub-resource (Collection)** : `/posts/{post_id}/comments`.
-**Sub-resource (Item)** : `/posts/{post_id}/comments/{comment_id}`.
-**Sub-resource (Relationship)** : `/users/{user_id}/followers`.
-**Sub-resource (Relationship)** : `/users/{user_id}/following`.
-**Collection / Sub-resource (Tags)** : `/tags`<br>`/posts/{post_id}/tags`.
+* **Collection**: `/posts`.
+* **Item** `/posts/{post_id}` Quản lý một bài viết cụ thể theo ID.
+* **Sub-resource (Collection)** : `/posts/{post_id}/comments`.
+* **Sub-resource (Item)** : `/posts/{post_id}/comments/{comment_id}`.
+* **Sub-resource (Relationship)** : `/users/{user_id}/followers`.
+* **Sub-resource (Relationship)** : `/users/{user_id}/following`.
+* **Collection / Sub-resource (Tags)** : `/tags`<br>`/posts/{post_id}/tags`.
 
 ## 4. Flask routes cho posts
 ![GET method to list all posts](get_posts.png)
