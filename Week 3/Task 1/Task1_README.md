@@ -36,11 +36,11 @@ Dựa trên yêu cầu hệ thống blog, resources chính được xác định
 
 ## 4. Flask routes cho posts
 * **GET posts**
-* ![GET method to list all posts](list_all_posts.png)
-* ![GET method to list posts from user](list_user_posts.png)
-* ![GET method to list posts with tag](list_post_with_tag.png)
-* ![failed get posts from users](fail_get_user_posts.png)
+    * ![GET method to list all posts](list_all_posts.png) 
+    * ![GET method to list posts from user](list_user_posts.png) 
+    * ![GET method to list posts with tag](list_post_with_tag.png) 
+    * ![Failed get posts from users](fail_get_user_posts.png) 
 * **POST post**
-* ![CREATE new post](create_post.png)
-* ![failed create new post from user](fail_create_posts.png)
-* ![missing tags](missing_tag.png)
+    * ![CREATE new post](create_post.png) 
+    * ![Failed create new post from user](fail_create_posts.png) 
+    * ![Missing tags](missing_tag.png) 
