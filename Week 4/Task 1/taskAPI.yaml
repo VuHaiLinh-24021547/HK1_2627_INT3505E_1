@@ -1,0 +1,185 @@
+openapi: 3.0.3
+info:
+  title: Tasks API
+  description: Quản lý task nội bộ
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: Main Server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /tasks:
+    get:
+      summary: Lấy danh sách task
+      operationId: getTasks
+      responses:
+        '200':
+          description: Trả về danh sách task
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+    post:
+      summary: Tạo mới task
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskInput'
+      responses:
+        '201':
+          description: Tạo task thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+  /tasks/{taskId}:
+    parameters:
+      - in: path
+        name: taskId
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID duy nhất của task
+
+    get:
+      summary: Lấy chi tiết task theo ID
+      operationId: getTaskById
+      responses:
+        '200':
+          description: Trả về thông tin chi tiết task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Không tìm thấy task
+
+    patch:
+      summary: Cập nhật thông tin task
+      operationId: patchTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskInput'
+      responses:
+        '200':
+          description: Cập nhật task thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Không tìm thấy task
+
+    delete:
+      summary: Xóa task
+      operationId: deleteTask
+      responses:
+        '204':
+          description: Xóa task thành công (No Content)
+        '404':
+          description: Không tìm thấy task
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TaskStatus:
+      type: string
+      enum: [TODO, IN_PROGRESS, DONE, CANCELLED]
+      example: IN_PROGRESS
+
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - status
+        - priority
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          example: "Viết tài liệu OpenAPI"
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+          example: HIGH
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-10-15T17:00:00Z"
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "987e6543-e21b-12d3-a456-426614174000"
+
+    CreateTaskInput:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          example: "Viết tài liệu OpenAPI"
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+          default: TODO
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+          default: MEDIUM
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-10-15T17:00:00Z"
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "987e6543-e21b-12d3-a456-426614174000"
+
+    UpdateTaskInput:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Cập nhật specification API"
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
