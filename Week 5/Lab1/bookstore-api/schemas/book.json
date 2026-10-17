@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "required": ["id", "title", "price_vnd"],
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "isbn": {
+      "type": "string",
+      "pattern": "^\\d{13}$"
+    },
+    "price_vnd": {
+      "type": "integer"
+    },
+    "authors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/author"
+      }
+    }
+  },
+  "$defs": {
+    "author": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "enum": ["lead", "co", "ed"]
+        }
+      }
+    }
+  }
+}
