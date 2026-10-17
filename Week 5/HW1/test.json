@@ -1,0 +1,86 @@
+{
+    "title": "Test",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Mã định danh bài trắc nghiệm",
+            "example": "0000-0000-0000-0000"
+        },
+        "title": {
+            "type": "string",
+            "description": "Tiêu đề bài thi",
+            "example": "bài thi giữa kì môn kiến trúc hướng dịch vụ"
+        },
+        "description": {
+            "type": "string",
+            "description": "Mô tả bài thi",
+            "example": "bài thi chiếm 30% điểm thành phần"
+        },
+        "createdBy": {
+            "type": "string",
+            "description": "Mã ID của giáo viên tạo đề",
+            "example": "UET00000000"
+        },
+        "attenedStudents": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Danh sách mã ID của các sinh viên tham gia bài thi",
+            "items": {
+                "type": "string"
+            },
+            "example": ["UET00000000", "UET24021547"]
+        },
+        "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 300,
+            "description": "Thời gian làm bài tính bằng phút",
+            "example": "120"
+        },
+        "questions": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Danh sách các câu hỏi trắc nghiệm",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "questionId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "0000-0000-0000-0000"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Nội dung câu hỏi",
+                        "example": "Đặc điểm của cursor-based pagination là gì?"
+                    },
+                    "options": {
+                        "type": "array",
+                        "minItems": 2,
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Danh sách các phương án lựa chọn",
+                        "example": ["A", "B", "C", "D"]
+                    },
+                    "correctOptionIndex": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Chỉ số (index) của đáp án đúng trong mảng options",
+                        "example": 0
+                    }
+                },
+                "required": ["questionId", "content", "options", "correctOptionIndex"],
+                "additionalProperties": false
+            }
+        },
+        "createdAt": {
+        "type": "string",
+        "format": "date-time"
+        }
+    },
+    "required": ["id", "title", "createdBy", "durationMinutes", "questions"],
+    "additionalProperties": false
+}

@@ -1,0 +1,31 @@
+{
+    "title": "Student",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Mã định danh của học sinh",
+            "example": "UET24021547"
+        },
+        "name": {
+            "type": "string",
+            "description": "tên sinh viên",
+            "example": "Vũ Hải Linh"
+        },
+        "class": {
+            "type": "string",
+            "description": "mã lớp đơn vị của sinh viên",
+            "example": "K69I-CS3"
+        },
+        "enrolledClasses": {
+            "type": "array",
+            "description": "Danh sách mã các lớp học phần sinh viên tham gia",
+            "items": {
+                "type": "string"
+            },
+            "example": ["INT2214_2", "INT3405E_3", "INT3503E_3"]
+        }
+    },
+    "required": ["id", "name", "class"],
+    "additionalProperties": false
+}

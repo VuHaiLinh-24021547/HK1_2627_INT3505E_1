@@ -1,0 +1,34 @@
+{
+    "title": "Teacher",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Mã định danh duy nhất của giảng viên",
+            "example": "UET00000000"
+        },
+        "name": {
+            "type": "string",
+            "description": "tên giảng viên"
+        },
+        "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email công việc"
+        },
+        "department": {
+            "type": "string",
+            "description": "Khoa / Bộ môn giảng dạy"
+        },
+        "enrolledClasses": {
+            "type": "array",
+            "description": "Danh sách mã các lớp học phần giảng viên tham gia",
+            "items": {
+                "type": "string"
+            },
+            "example": ["INT2214_2", "INT3405E_3", "INT3503E_3"]
+        }
+    },
+    "required": ["id", "name", "email", "department"],
+    "additionalProperties": false
+}
