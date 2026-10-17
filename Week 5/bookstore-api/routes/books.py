@@ -2,28 +2,45 @@ from flask import Blueprint, request, jsonify
 from jsonschema import validate, ValidationError
 import json
 import base64
-from sqlalchemy import select, tuple_
-from models import db, Book, Author
+from sqlalchemy import select, tuple_, func
+from models import db, Book, Author, Category
 
 bp = Blueprint('books', __name__)
 SCHEMA = json.load(open("./schemas/book.json"))
 
-SORT = {"id": Book.id, "price": Book.price_vnd}
+SORT = {
+    "id": Book.id,
+    "price": Book.price_vnd,
+    "title": Book.title
+}
 
 def parse_sort(raw):
-    desc = raw.startswith("-")
-    key = raw.lstrip("-")
+    if not raw:
+        raw = "-id"
 
-    if key not in SORT:
-        return None, "bad_sort", 400
+    sort_keys = [s.strip() for s in raw.split(",") if s.strip()]
+    cols = []
+    primary_col = None
+    primary_desc = False
 
-    p = SORT[key]
-    cols = [
-        p.desc() if desc else p.asc(),
-        Book.id.desc() if desc else Book.id.asc()
-    ]
+    for idx, key_str in enumerate(sort_keys):
+        desc = key_str.startswith("-")
+        clean_key = key_str.lstrip("-")
 
-    return p, cols, desc
+        if clean_key not in SORT:
+            return None, None, None, f"bad_sort:{clean_key}"
+
+        col = SORT[clean_key]
+        cols.append(col.desc() if desc else col.asc())
+
+        if idx == 0:
+            primary_col = col
+            primary_desc = desc
+
+    if Book.id not in [SORT[k.lstrip("-")] for k in sort_keys]:
+        cols.append(Book.id.desc() if primary_desc else Book.id.asc())
+
+    return cols, primary_col, primary_desc, None
 
 def _enc(s):
     return base64.urlsafe_b64encode(
@@ -35,9 +52,10 @@ def apply_cursor(q, raw, sort, p, desc):
         return q, None, 200
 
     pad = "=" * (-len(raw) % 4)
-    c = json.loads(
-        base64.urlsafe_b64decode(raw + pad)
-    )
+    try:
+        c = json.loads(base64.urlsafe_b64decode(raw + pad))
+    except Exception:
+        return None, "invalid_cursor", 400
 
     if c.get("s") != sort:
         return None, "sort_chg", 400
@@ -49,7 +67,7 @@ def apply_cursor(q, raw, sort, p, desc):
 
     return q.filter(condition), None, 200
 
-def build_response(items, lim, sort, p, more):
+def build_cursor_response(items, lim, sort, p, more):
     nxt = None
     if items and more:
         last = items[-1]
@@ -59,6 +77,7 @@ def build_response(items, lim, sort, p, more):
             "i": last.id
         })
     return jsonify({
+        "strategy": "cursor",
         "limit": lim,
         "data": [b.to_dict() for b in items],
         "page": {"next": nxt, "more": more}
@@ -66,27 +85,55 @@ def build_response(items, lim, sort, p, more):
 
 @bp.get("")
 def list_books():
-    raw = request.args.get("cursor")
+    strategy = request.args.get("strategy", "cursor")
     lim = min(request.args.get("limit", 20, type=int), 100)
     sort = request.args.get("sort", "-id")
     cat = request.args.get("category", type=int)
+    genre = request.args.get("genre")
 
-    p, cols, desc = parse_sort(sort)
-    if p is None:
-        return jsonify({"error": cols}), 400
+    cols, p, desc, err = parse_sort(sort)
+    if err:
+        return jsonify({"error": err}), 400
 
-    q = select(Book).order_by(*cols)
+    q = select(Book)
+
     if cat:
         q = q.filter(Book.category_id == cat)
+    if genre:
+        q = q.join(Book.category).filter((Category.slug == genre) | (Category.name == genre))
 
-    q, err, code = apply_cursor(q, raw, sort, p, desc)
-    if err:
-        return jsonify({"e": err}), code
-    
+    q = q.order_by(*cols)
+
+    if strategy == "offset":
+        page = max(request.args.get("page", 1, type=int), 1)
+        offset_val = (page - 1) * lim
+
+        total_stmt = select(func.count()).select_from(q.subquery())
+        total = db.session.scalar(total_stmt) or 0
+
+        rows = db.session.scalars(q.offset(offset_val).limit(lim)).all()
+
+        return jsonify({
+            "strategy": "offset",
+            "data": [b.to_dict() for b in rows],
+            "pagination": {
+                "page": page,
+                "limit": lim,
+                "total": total,
+                "total_pages": (total + lim - 1) // lim if lim else 1
+            }
+        }), 200
+
+    raw_cursor = request.args.get("cursor")
+    q, err_msg, code = apply_cursor(q, raw_cursor, sort, p, desc)
+    if err_msg:
+        return jsonify({"error": err_msg}), code
+
     rows = db.session.scalars(q.limit(lim + 1)).all()
+    more = len(rows) > lim
 
-    return build_response(
-        rows[:lim], lim, sort, p, len(rows) > lim
+    return build_cursor_response(
+        rows[:lim], lim, sort, p, more
     )
 
 @bp.get("/<int:book_id>")
@@ -109,14 +156,13 @@ def create_book():
     book_id = payload.get("id")
     title = payload.get("title")
     isbn = payload.get("isbn")
-    price_data = payload.get("price", {})
-    amount = price_data.get("amount", 0)
+    price_vnd = payload.get("price_vnd", 0)
 
     book = Book(
-        custom_id=book_id,
+        id=book_id,
         title=title,
         isbn=isbn,
-        price_vnd=amount
+        price_vnd=price_vnd
     )
 
     authors_payload = payload.get("authors", [])
