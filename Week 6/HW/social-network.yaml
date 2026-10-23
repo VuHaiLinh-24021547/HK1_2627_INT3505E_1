@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: Social Network API
+  description: Specification cho 3 endpoint chính của hệ thống Social Network, bao gồm phạm vi truy cập (Scopes), Mã trạng thái HTTP (Status Codes) và các lỗi có thể xảy ra.
+  version: 1.0.0
+
+paths:
+  /auth/login:
+    post:
+      summary: Đăng nhập người dùng
+      description: |
+        Đăng nhập bằng email và mật khẩu để nhận Access Token và Refresh Token.
+        - **Required Scope:** Không yêu cầu (Public Endpoint).
+      security: [] 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: "Password123!"
+      responses:
+        '200':
+          description: Đăng nhập thành công, trả về bộ đôi token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOi..."
+                  refresh_token:
+                    type: string
+                    example: "def456..."
+                  token_type:
+                    type: string
+                    example: Bearer
+        '400':
+          description: Lỗi dữ liệu đầu vào không đúng định dạng (Bad Request).
+        '401':
+          description: Sai thông tin đăng nhập - email hoặc mật khẩu không đúng (Unauthorized).
+        '429':
+          description: Quá nhiều yêu cầu đăng nhập thất bại trong khoảng thời gian ngắn (Too Many Requests).
+
+  /auth/refresh:
+    post:
+      summary: Cấp lại Access Token
+      description: |
+        Sử dụng Refresh Token còn hiệu lực để xin cấp một Access Token mới.
+        - **Required Scope:** `auth:refresh`
+      security:
+        - BearerAuth:
+            - auth:refresh
+      responses:
+        '200':
+          description: Cấp lại Access Token thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOi..."
+                  token_type:
+                    type: string
+                    example: Bearer
+        '401':
+          description: Refresh Token bị thiếu, hết hạn hoặc sai định dạng (Unauthorized).
+        '403':
+          description: Refresh Token đã bị thu hồi/đưa vào blocklist hoặc thiếu scope `auth:refresh` (Forbidden).
+
+  /posts/{id}:
+    get:
+      summary: Xem chi tiết bài viết
+      description: |
+        Lấy thông tin chi tiết của một bài viết theo ID.
+        - **Required Scope:** `posts:read`
+        - **Authorization:** Yêu cầu quyền truy cập cấp đối tượng (Ownership / Privacy Check).
+      security:
+        - BearerAuth:
+            - posts:read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID của bài viết cần tra cứu
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: Lấy thông tin bài viết thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 100
+                  author_id:
+                    type: integer
+                    example: 1
+                  content:
+                    type: string
+                    example: "Hello World!"
+                  created_at:
+                    type: string
+                    format: date-time
+        '401':
+          description: Thiếu hoặc JWT Access Token không hợp lệ (Unauthorized).
+        '403':
+          description: Bị từ chối do thiếu scope `posts:read` hoặc bài viết là riêng tư (BOLA restriction) (Forbidden).
+        '404':
+          description: Không tìm thấy bài viết với ID tương ứng (Not Found).
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: oauth2
+      description: Xác thực JWT Bearer Token kèm theo Scopes.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.socialnetwork.test/oauth/authorize
+          tokenUrl: https://api.socialnetwork.test/oauth/token
+          scopes:
+            auth:refresh: Quyền cấp lại Access Token mới
+            posts:read: Quyền đọc danh sách và chi tiết bài viết
+            posts:write: Quyền tạo, chỉnh sửa hoặc xóa bài viết
