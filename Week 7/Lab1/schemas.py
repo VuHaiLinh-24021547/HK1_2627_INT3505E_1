@@ -28,3 +28,29 @@ class ProductPatch(Schema):
 # Schema cho POST /api/v1/products/<int:id>/reserve
 class ReserveIn(Schema):
     qty = fields.Int(required=True, validate=validate.Range(min=1))
+
+class OrderItemIn(Schema):
+    id = fields.Int(required=True)
+    qty = fields.Int(required=True, validate=validate.Range(min=1))
+
+class OrderItemOut(Schema):
+    id = fields.Int()
+    product_id = fields.Int()
+    qty = fields.Int()
+    unit_price_cents = fields.Int()
+    
+class OrderIn(Schema):
+    items = fields.List(
+        fields.Nested(OrderItemIn),
+        required=True,
+        validate=validate.Length(min=1)
+    )
+
+class OrderOut(Schema):
+    id = fields.Int()
+    created_at = fields.DateTime()
+    items = fields.List(fields.Nested(OrderItemOut))
+    total_cents = fields.Method("get_total_cents")
+
+    def get_total_cents(self, obj):
+        return sum(item.qty * item.unit_price_cents for item in obj.items)

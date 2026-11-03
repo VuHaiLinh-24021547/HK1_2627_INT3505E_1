@@ -3,7 +3,9 @@ from flask import Flask
 from extensions import db
 from errors import register_error_handlers
 from api.products import products_bp
+from api.orders import orders_bp
 from models.product import Product
+from models import order
 
 def init_sample_data():
     count = db.session.scalar(db.select(db.func.count()).select_from(Product))
@@ -36,6 +38,7 @@ def create_app(config_override=None):
     # Đăng ký Error Handlers & Blueprint
     register_error_handlers(app)
     app.register_blueprint(products_bp)
+    app.register_blueprint(orders_bp)
 
     # Khởi tạo bảng dữ liệu SQLite tự động
     with app.app_context():
