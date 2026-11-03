@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from sqlalchemy.orm import selectinload
 from extensions import db
 from models.product import Product
 from models.order import Order, OrderItem
@@ -51,13 +52,15 @@ def list_orders():
     page = max(1, int(request.args.get("page", 1)))
     size = min(100, max(1, int(request.args.get("size", 20))))
 
-    rows = db.session.execute(
+    # Sử dụng selectinload(Order.items) để eager load danh sách items
+    stmt = (
         db.select(Order)
+        .options(selectinload(Order.items))
         .order_by(Order.id.desc())
         .offset((page - 1) * size)
         .limit(size)
-    ).scalars().all()
-
+    )
+    rows = db.session.execute(stmt).scalars().all()
     total = db.session.scalar(db.select(db.func.count()).select_from(Order))
 
     return jsonify({

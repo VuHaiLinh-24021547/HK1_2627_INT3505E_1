@@ -31,3 +31,12 @@
 * ![14](img/order/add_product.png)
 * Delete order
 * ![15](img/order/delete.png)
+
+**Healthz and Ready Endpoint Test**
+* Healthz
+* ![16](img/healthz_ready/healthz.png)
+* Ready
+* ![17](img/healthz_ready/ready.png)
+
+**Pytest**
+* ![18](img/pytest/pytest.png)

@@ -4,6 +4,7 @@ from extensions import db
 from errors import register_error_handlers
 from api.products import products_bp
 from api.orders import orders_bp
+from api.health import health_bp
 from models.product import Product
 from models import order
 
@@ -39,6 +40,7 @@ def create_app(config_override=None):
     register_error_handlers(app)
     app.register_blueprint(products_bp)
     app.register_blueprint(orders_bp)
+    app.register_blueprint(health_bp)
 
     # Khởi tạo bảng dữ liệu SQLite tự động
     with app.app_context():
