@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: Product Management API
+  version: 1.0.0
+
+paths:
+  /products:
+    get:
+      summary: Lấy danh sách sản phẩm
+      operationId: app.get_products
+      responses:
+        '200':
+          description: Thành công
+
+    post:
+      summary: Tạo sản phẩm mới
+      operationId: app.create_product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - price
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+      responses:
+        '201':
+          description: Tạo thành công
+
+  /products/{product_id}:
+    get:
+      summary: Lấy chi tiết sản phẩm theo ID
+      operationId: app.get_product_by_id
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Thành công
+        '404':
+          description: Không tìm thấy sản phẩm
