@@ -1,0 +1,15 @@
+extends: ["spectral:oas"]
+
+rules:
+  info-contact: off
+  operation-description: off
+  operation-tags: off
+
+  response-200-must-have-properties:
+    description: "Response 200 dạng object không được để trống thuộc tính properties."
+    message: "Schema object của response 200 thiếu khai báo properties."
+    severity: error
+    given: "$.paths..responses['200'].content['application/json'].schema[?(@.type == 'object')]"
+    then:
+      field: properties
+      function: defined
