@@ -53,3 +53,25 @@ def test_delete_then_get_same_id(client):
 
     get_res = client.get(f"books/{book_id}")
     assert get_res.status_code == 404
+
+LOGIN_RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "token": {"type": "string"}
+    },
+    "required": ["token"],
+    "additionalProperties": False
+}
+
+def test_response_extra_field_blocked(client):
+    response = client.post("/auth/login", json={"user": "lab", "pwd": "lab"})
+    assert response.status_code == 200
+    res_data = response.get_json()
+    
+    validate(instance=res_data, schema=LOGIN_RESPONSE_SCHEMA)
+
+    mock_leaked_response = res_data.copy()
+    mock_leaked_response["password_hash"] = "$2b$12$eImiTXuWVfxh0..."
+
+    with pytest.raises(ValidationError):
+        validate(instance=mock_leaked_response, schema=LOGIN_RESPONSE_SCHEMA)
