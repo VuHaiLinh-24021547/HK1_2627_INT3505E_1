@@ -24,7 +24,7 @@
     ```bash
     python app.py
     ```
-    *(Đảm bảo server đang lắng nghe tại `http://127.0.0.1:5000` khớp với `base_url` trong `staging.postman_environment.json`).*
+    *(Đảm bảo server đang lắng nghe tại `http://127.0.0.1:5000` khớp với `base_url` trong `local.postman_environment.json`).*
 
     3. **Chạy test bằng Newman và xuất file `junit.xml`**:
     ```bash
